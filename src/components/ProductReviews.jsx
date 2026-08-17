@@ -10,7 +10,8 @@ export default function ProductReviews() {
     const fetchReviews = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:5000/api/reviews');
+        // Live Railway backend URL added here
+        const response = await fetch('https://ecommerce-web-backend-production-3020.up.railway.app/api/reviews');
         if (!response.ok) {
           throw new Error('Reviews load karne mein masla hai');
         }

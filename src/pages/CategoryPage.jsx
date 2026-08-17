@@ -19,8 +19,8 @@ export default function CategoryPage() {
   useEffect(() => {
     const currentStyle = styleName || 'casual';
     
-    // Backend API call
-    fetch(`http://localhost:5000/api/products/category/${currentStyle}`)
+    // Live Railway backend API call
+    fetch(`https://ecommerce-web-backend-production-3020.up.railway.app/api/products/category/${currentStyle}`)
       .then(res => res.json())
       .then(data => {
         console.log("Products fetched successfully:", data);

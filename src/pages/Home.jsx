@@ -16,11 +16,11 @@ export default function HomePage() {
     const fetchData = async () => {            
       try {
         const [resBrands, resNew, resTop, resStyles, resReviews] = await Promise.all([
-          fetch('http://localhost:5000/api/brands'),
-          fetch('http://localhost:5000/api/products/new-arrivals'),
-          fetch('http://localhost:5000/api/products/top-selling'),
-          fetch('http://localhost:5000/api/categories/styles'),
-          fetch('http://localhost:5000/api/reviews')
+          fetch('https://ecommerce-web-backend-production-3020.up.railway.app/api/brands'),
+          fetch('https://ecommerce-web-backend-production-3020.up.railway.app/api/products/new-arrivals'),
+          fetch('https://ecommerce-web-backend-production-3020.up.railway.app/api/products/top-selling'),
+          fetch('https://ecommerce-web-backend-production-3020.up.railway.app/api/categories/styles'),
+          fetch('https://ecommerce-web-backend-production-3020.up.railway.app/api/reviews')
         ]);
 
         setBrands(await resBrands.json());

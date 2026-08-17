@@ -19,7 +19,8 @@ export default function ProductDetail() {
     const fetchProductDetail = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/products/${id}`);
+        // Live Railway backend URL for product detail
+        const response = await fetch(`https://ecommerce-web-backend-production-3020.up.railway.app/api/products/${id}`);
         
         if (!response.ok) {
           throw new Error('Product load karne mein masla hai');
@@ -38,10 +39,10 @@ export default function ProductDetail() {
       }
     };
 
-    // 👉 Yahan 'new-arrivals' ki jagah 'related' kar diya hai
     const fetchRelatedProducts = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/products/related');
+        // Live Railway backend URL for related products
+        const response = await fetch('https://ecommerce-web-backend-production-3020.up.railway.app/api/products/related');
         const data = await response.json();
         setRelatedProducts(data);
       } catch (err) {
