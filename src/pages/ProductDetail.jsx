@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import ProductReviews from '../components/ProductReviews';
-import NewArrivals from '../components/NewArrivals'; 
+import NewArrivals from '../components/NewArrivals';
+import { useCart } from '../context/CartContext'; 
 
 export default function ProductDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
   const [product, setProduct] = useState(null);
   const [mainImage, setMainImage] = useState('');
   const [selectedColor, setSelectedColor] = useState(0);
@@ -12,6 +15,7 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [justAdded, setJustAdded] = useState(false);
   
   const [relatedProducts, setRelatedProducts] = useState([]);
 
@@ -60,6 +64,16 @@ export default function ProductDetail() {
   const productImages = product.images || [product.image, product.image, product.image];
   const productColors = product.colors || ["#313B2F", "#26433B", "#252B48"];
   const productSizes = product.sizes || ["Small", "Medium", "Large", "X-Large"];
+
+  const handleAddToCart = () => {
+    addToCart(product, {
+      size: selectedSize,
+      color: productColors[selectedColor],
+      quantity,
+    });
+    setJustAdded(true);
+    setTimeout(() => setJustAdded(false), 1500);
+  };
 
   return (
     <div className="product-detail-container">
@@ -149,7 +163,9 @@ export default function ProductDetail() {
               <span className="qty-value">{quantity}</span>
               <span className="qty-btn" onClick={() => setQuantity(quantity + 1)}>+</span>
             </div>
-            <button className="add-to-cart-btn">Add to Cart</button>
+            <button className="add-to-cart-btn" onClick={handleAddToCart}>
+              {justAdded ? 'Added ✓' : 'Add to Cart'}
+            </button>
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import ShopSidebar from '../components/ShopSidebar';
 
 export default function CategoryPage() {
@@ -106,31 +106,37 @@ export default function CategoryPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
             {filteredProducts.length > 0 ? (
               filteredProducts.map(product => (
-                <div key={product.id} style={{ background: '#fff', borderRadius: '20px', padding: '10px' }}>
-                  <div style={{ background: '#F0EEED', borderRadius: '20px', overflow: 'hidden', height: '280px', marginBottom: '15px' }}>
-                    <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </div>
-                  <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '8px' }}>{product.name}</h3>
-                  
-                  {/* Rating */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', fontSize: '14px' }}>
-                    <span style={{ color: '#FFC633' }}>{product.stars || '★★★★☆'}</span>
-                    <span style={{ color: '#000', fontSize: '12px' }}>{product.rating || '4.5/5'}</span>
-                  </div>
+                <Link
+                  to={`/shop/${product.id}`}
+                  key={product.id}
+                  style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+                >
+                  <div style={{ background: '#fff', borderRadius: '20px', padding: '10px' }}>
+                    <div style={{ background: '#F0EEED', borderRadius: '20px', overflow: 'hidden', height: '280px', marginBottom: '15px' }}>
+                      <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                    <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '8px' }}>{product.name}</h3>
 
-                  {/* Price */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontSize: '20px', fontWeight: '700', color: '#000' }}>{product.price}</span>
-                    {product.originalPrice && (
-                      <span style={{ fontSize: '20px', fontWeight: '700', color: '#b2b2b2', textDecoration: 'line-through' }}>{product.originalPrice}</span>
-                    )}
-                    {product.discount && (
-                      <span style={{ background: 'rgba(255, 51, 51, 0.1)', color: '#FF3333', padding: '4px 10px', borderRadius: '62px', fontSize: '12px', fontWeight: '600' }}>
-                        {product.discount}
-                      </span>
-                    )}
+                    {/* Rating */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', fontSize: '14px' }}>
+                      <span style={{ color: '#FFC633' }}>{product.stars || '★★★★☆'}</span>
+                      <span style={{ color: '#000', fontSize: '12px' }}>{product.rating || '4.5/5'}</span>
+                    </div>
+
+                    {/* Price */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '20px', fontWeight: '700', color: '#000' }}>{product.price}</span>
+                      {product.originalPrice && (
+                        <span style={{ fontSize: '20px', fontWeight: '700', color: '#b2b2b2', textDecoration: 'line-through' }}>{product.originalPrice}</span>
+                      )}
+                      {product.discount && (
+                        <span style={{ background: 'rgba(255, 51, 51, 0.1)', color: '#FF3333', padding: '4px 10px', borderRadius: '62px', fontSize: '12px', fontWeight: '600' }}>
+                          {product.discount}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
+                </Link>
               ))
             ) : (
               <p style={{ fontSize: '16px', color: '#7f7f7f', gridColumn: 'span 3', textAlign: 'center', padding: '40px' }}>
