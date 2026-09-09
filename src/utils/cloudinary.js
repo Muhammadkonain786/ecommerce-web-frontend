@@ -7,8 +7,8 @@
 // 3. Settings > Upload > "Add upload preset" > Signing Mode = "Unsigned" > Save
 //    us preset ka naam neeche UPLOAD_PRESET mein daal dein
 
-const CLOUD_NAME = "YOUR_CLOUD_NAME"; // <-- yahan apna Cloudinary cloud name daalein
-const UPLOAD_PRESET = "YOUR_UPLOAD_PRESET"; // <-- yahan apna unsigned upload preset naam daalein
+const CLOUD_NAME = "t3tprieq";
+const UPLOAD_PRESET = "ecommerce_unsigned";
 
 export async function uploadImageToCloudinary(file) {
   const formData = new FormData();
