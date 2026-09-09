@@ -55,6 +55,7 @@ export function CartProvider({ children }) {
           image: product.image,
           price: parsePrice(product.price),
           originalPrice: product.originalPrice ? parsePrice(product.originalPrice) : null,
+          costPrice: product.costPrice ? parsePrice(product.costPrice) : 0,
           size,
           color,
           quantity,

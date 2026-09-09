@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 const DELIVERY_FEE = 15;
+const API_BASE_URL = "https://ecommerce-web-backend-production-3020.up.railway.app";
 
 // Simple demo promo code - not connected to a backend
 const PROMO_CODES = {
@@ -10,10 +11,13 @@ const PROMO_CODES = {
 };
 
 export default function Cart() {
-  const { cartItems, removeFromCart, updateQuantity } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState(null);
   const [promoMessage, setPromoMessage] = useState('');
+  const [placingOrder, setPlacingOrder] = useState(false);
+  const [checkoutError, setCheckoutError] = useState('');
+  const navigate = useNavigate();
 
   // Original (pre-discount) price line ke liye - agar originalPrice na ho toh price hi use ho
   const lineOriginal = (item) => (item.originalPrice ?? item.price) * item.quantity;
@@ -46,6 +50,39 @@ export default function Cart() {
   };
 
   const fmt = (value) => `$${value.toFixed(0)}`;
+
+  const handleCheckout = async () => {
+    setCheckoutError('');
+    setPlacingOrder(true);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: cartItems.map((item) => ({
+            productId: item.id,
+            name: item.name,
+            image: item.image,
+            price: item.price,
+            costPrice: item.costPrice || 0,
+            quantity: item.quantity,
+            size: item.size,
+            color: item.color,
+          })),
+        }),
+      });
+
+      if (!res.ok) throw new Error('Order place nahi ho saka');
+
+      clearCart();
+      navigate('/', { state: { orderSuccess: true } });
+    } catch (err) {
+      setCheckoutError('Order place karne mein masla aya. Dobara koshish karein.');
+    } finally {
+      setPlacingOrder(false);
+    }
+  };
 
   if (cartItems.length === 0) {
     return (
@@ -179,8 +216,10 @@ export default function Cart() {
           </div>
           {promoMessage && <p className="promo-message">{promoMessage}</p>}
 
-          <button className="checkout-btn">
-            Go to Checkout
+          {checkoutError && <p className="promo-message" style={{ color: '#ff3b30' }}>{checkoutError}</p>}
+
+          <button className="checkout-btn" onClick={handleCheckout} disabled={placingOrder}>
+            {placingOrder ? 'Placing Order...' : 'Go to Checkout'}
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M5 12h14M13 5l7 7-7 7" />
             </svg>

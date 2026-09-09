@@ -22,7 +22,7 @@ export default function Navbar() {
             </svg>
           </button>
           
-          <a href="#" className="nav-logo">SHOP.CO</a>
+          <Link to="/" className="nav-logo">SHOP.CO</Link>
         </div>
 
         {/* Center Links */}
