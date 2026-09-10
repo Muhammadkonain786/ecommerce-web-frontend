@@ -2814,3 +2814,303 @@ body {
     font-size: 12px;
   }
 }
+
+/* Order status dropdown */
+.admin-status-select {
+  border: none;
+  border-radius: 20px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+.admin-status-shipped {
+  background: #DBEAFE;
+  color: #1D4ED8;
+}
+
+.admin-status-delivered {
+  background: #DCFCE7;
+  color: #15803D;
+}
+
+/* Multiple image gallery in Add/Edit Product form */
+.admin-image-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.admin-image-thumb-wrapper {
+  position: relative;
+  width: 70px;
+  height: 70px;
+}
+
+.admin-image-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.admin-image-remove-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ff3b30;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-image-main-badge {
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  background: #000;
+  color: #fff;
+  font-size: 9px;
+  border-radius: 4px;
+  padding: 1px 0;
+}
+
+/* Inline form (coupons page) */
+.admin-inline-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-inline-form input {
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+
+.admin-inline-form input:focus {
+  border-color: #6366F1;
+}
+
+/* ================= INVOICE ================= */
+
+.invoice-modal {
+  max-width: 560px;
+}
+
+.invoice-header {
+  text-align: center;
+  border-bottom: 2px solid #000;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.invoice-header h2 {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.invoice-title {
+  color: #888;
+  font-size: 13px;
+  letter-spacing: 3px;
+  margin-top: 4px;
+}
+
+.invoice-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 20px;
+  gap: 20px;
+}
+
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.invoice-table th {
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  padding: 8px 4px;
+  color: #888;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.invoice-table td {
+  padding: 8px 4px;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.invoice-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  font-weight: 800;
+  border-top: 2px solid #000;
+  padding-top: 12px;
+}
+
+.invoice-footer {
+  text-align: center;
+  color: #888;
+  font-size: 12px;
+  margin-top: 24px;
+}
+
+/* Print karte waqt sirf invoice dikhe, baaki sab chhup jaye */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .invoice-print-area, .invoice-print-area * {
+    visibility: visible;
+  }
+  .invoice-print-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+  }
+  .invoice-no-print {
+    display: none !important;
+  }
+}
+
+/* Product search/filter row */
+.admin-filter-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.admin-search-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+
+.admin-search-input:focus {
+  border-color: #6366F1;
+}
+
+.admin-category-filter {
+  padding: 10px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  background: #fff;
+  cursor: pointer;
+}
+
+/* Dashboard date range selector */
+.admin-date-range-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-range-btn {
+  background: #f0f0f0;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #555;
+  transition: all 0.2s;
+}
+
+.admin-range-btn:hover {
+  background: #e5e5e5;
+}
+
+.admin-range-btn.active {
+  background: #000;
+  color: #fff;
+}
+
+.admin-alert-warning {
+  background: #FEF9C3;
+  border-color: #FDE047;
+  color: #854D0E;
+}
+
+/* Category-wise sales bar list */
+.admin-category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-category-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 160px;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.admin-category-name {
+  text-transform: capitalize;
+  font-weight: 600;
+}
+
+.admin-category-bar-track {
+  background: #f0f0f0;
+  border-radius: 20px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.admin-category-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366F1, #22C55E);
+  border-radius: 20px;
+}
+
+.admin-category-value {
+  color: #666;
+  font-size: 13px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .admin-category-row {
+    grid-template-columns: 80px 1fr;
+  }
+  .admin-category-value {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+}

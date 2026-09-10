@@ -56,6 +56,7 @@ export function CartProvider({ children }) {
           price: parsePrice(product.price),
           originalPrice: product.originalPrice ? parsePrice(product.originalPrice) : null,
           costPrice: product.costPrice ? parsePrice(product.costPrice) : 0,
+          category: product.category || '',
           size,
           color,
           quantity,

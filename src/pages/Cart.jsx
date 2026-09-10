@@ -5,11 +5,6 @@ import { useCart } from '../context/CartContext';
 const DELIVERY_FEE = 15;
 const API_BASE_URL = "https://ecommerce-web-backend-production-3020.up.railway.app";
 
-// Simple demo promo code - not connected to a backend
-const PROMO_CODES = {
-  SAVE10: 0.10,
-};
-
 export default function Cart() {
   const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
   const [promoCode, setPromoCode] = useState('');
@@ -17,6 +12,8 @@ export default function Cart() {
   const [promoMessage, setPromoMessage] = useState('');
   const [placingOrder, setPlacingOrder] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
+  const [showCheckoutForm, setShowCheckoutForm] = useState(false);
+  const [checkoutInfo, setCheckoutInfo] = useState({ name: '', email: '', phone: '', address: '' });
   const navigate = useNavigate();
 
   // Original (pre-discount) price line ke liye - agar originalPrice na ho toh price hi use ho
@@ -34,24 +31,38 @@ export default function Cart() {
   const deliveryFee = cartItems.length > 0 ? DELIVERY_FEE : 0;
   const total = subtotal - productDiscount - promoDiscount + deliveryFee;
 
-  const handleApplyPromo = () => {
+  const handleApplyPromo = async () => {
     const code = promoCode.trim().toUpperCase();
     if (!code) {
       setPromoMessage('Pehle koi code likhein');
       return;
     }
-    if (PROMO_CODES[code]) {
-      setAppliedPromo(PROMO_CODES[code]);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/coupons/validate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      });
+
+      if (!res.ok) {
+        setAppliedPromo(null);
+        setPromoMessage('Yeh promo code valid nahi hai');
+        return;
+      }
+
+      const data = await res.json();
+      setAppliedPromo(data.discountPercent / 100);
       setPromoMessage(`Code "${code}" apply ho gaya! ✓`);
-    } else {
-      setAppliedPromo(null);
-      setPromoMessage('Yeh promo code valid nahi hai');
+    } catch (err) {
+      setPromoMessage('Promo check karne mein masla aya');
     }
   };
 
   const fmt = (value) => `$${value.toFixed(0)}`;
 
-  const handleCheckout = async () => {
+  const handleSubmitOrder = async (e) => {
+    e.preventDefault();
     setCheckoutError('');
     setPlacingOrder(true);
 
@@ -69,13 +80,19 @@ export default function Cart() {
             quantity: item.quantity,
             size: item.size,
             color: item.color,
+            category: item.category || '',
           })),
+          customerName: checkoutInfo.name,
+          customerEmail: checkoutInfo.email,
+          customerPhone: checkoutInfo.phone,
+          address: checkoutInfo.address,
         }),
       });
 
       if (!res.ok) throw new Error('Order place nahi ho saka');
 
       clearCart();
+      setShowCheckoutForm(false);
       navigate('/', { state: { orderSuccess: true } });
     } catch (err) {
       setCheckoutError('Order place karne mein masla aya. Dobara koshish karein.');
@@ -218,14 +235,63 @@ export default function Cart() {
 
           {checkoutError && <p className="promo-message" style={{ color: '#ff3b30' }}>{checkoutError}</p>}
 
-          <button className="checkout-btn" onClick={handleCheckout} disabled={placingOrder}>
-            {placingOrder ? 'Placing Order...' : 'Go to Checkout'}
+          <button className="checkout-btn" onClick={() => setShowCheckoutForm(true)}>
+            Go to Checkout
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M5 12h14M13 5l7 7-7 7" />
             </svg>
           </button>
         </div>
       </div>
+
+      {showCheckoutForm && (
+        <div className="admin-modal-backdrop" onClick={() => setShowCheckoutForm(false)}>
+          <form className="admin-modal" onClick={(e) => e.stopPropagation()} onSubmit={handleSubmitOrder}>
+            <h2>Delivery Details</h2>
+
+            <label>Full Name</label>
+            <input
+              required
+              value={checkoutInfo.name}
+              onChange={(e) => setCheckoutInfo({ ...checkoutInfo, name: e.target.value })}
+            />
+
+            <label>Email</label>
+            <input
+              required
+              type="email"
+              value={checkoutInfo.email}
+              onChange={(e) => setCheckoutInfo({ ...checkoutInfo, email: e.target.value })}
+            />
+
+            <label>Phone Number</label>
+            <input
+              required
+              value={checkoutInfo.phone}
+              onChange={(e) => setCheckoutInfo({ ...checkoutInfo, phone: e.target.value })}
+            />
+
+            <label>Delivery Address</label>
+            <textarea
+              required
+              rows={3}
+              value={checkoutInfo.address}
+              onChange={(e) => setCheckoutInfo({ ...checkoutInfo, address: e.target.value })}
+            />
+
+            {checkoutError && <p className="promo-message" style={{ color: '#ff3b30' }}>{checkoutError}</p>}
+
+            <div className="admin-modal-actions">
+              <button type="button" className="admin-secondary-btn" onClick={() => setShowCheckoutForm(false)}>
+                Cancel
+              </button>
+              <button type="submit" className="admin-primary-btn" disabled={placingOrder}>
+                {placingOrder ? 'Placing Order...' : 'Place Order'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

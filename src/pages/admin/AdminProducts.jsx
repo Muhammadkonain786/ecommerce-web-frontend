@@ -11,7 +11,7 @@ const emptyForm = {
   stock: '',
   category: 'casual',
   description: '',
-  image: '',
+  images: [],
 };
 
 export default function AdminProducts() {
@@ -22,6 +22,9 @@ export default function AdminProducts() {
   const [form, setForm] = useState(emptyForm);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState('all');
+  const [bulkUploading, setBulkUploading] = useState(false);
 
   const loadProducts = () => {
     setLoading(true);
@@ -53,25 +56,29 @@ export default function AdminProducts() {
       stock: product.stock,
       category: product.category,
       description: product.description || '',
-      image: product.image,
+      images: product.images && product.images.length > 0 ? product.images : [product.image],
     });
     setEditingId(product.id);
     setShowForm(true);
   };
 
   const handleImageChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
 
     setUploading(true);
     try {
-      const url = await uploadImageToCloudinary(file);
-      setForm((f) => ({ ...f, image: url }));
+      const urls = await Promise.all(files.map((file) => uploadImageToCloudinary(file)));
+      setForm((f) => ({ ...f, images: [...f.images, ...urls] }));
     } catch (err) {
       alert(err.message);
     } finally {
       setUploading(false);
     }
+  };
+
+  const removeImage = (index) => {
+    setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== index) }));
   };
 
   const handleSubmit = async (e) => {
@@ -80,6 +87,8 @@ export default function AdminProducts() {
 
     const payload = {
       ...form,
+      image: form.images[0] || '',
+      images: form.images,
       price: Number(form.price),
       originalPrice: form.originalPrice ? Number(form.originalPrice) : undefined,
       costPrice: Number(form.costPrice) || 0,
@@ -120,13 +129,111 @@ export default function AdminProducts() {
     }
   };
 
+  // Search (naam se) + category filter - dono client-side, kyunki products list
+  // pehle se hi fetch ho chuki hoti hai.
+  const filteredProducts = products.filter((p) => {
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = filterCategory === 'all' || p.category === filterCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  // Simple CSV parser: pehli line header honi chahiye.
+  // Columns: name,price,originalPrice,costPrice,stock,category,description,image
+  function parseCSV(text) {
+    const lines = text.trim().split('\n');
+    const headers = lines[0].split(',').map((h) => h.trim());
+
+    return lines.slice(1).map((line) => {
+      const values = line.split(',').map((v) => v.trim());
+      const row = {};
+      headers.forEach((header, i) => {
+        row[header] = values[i] || '';
+      });
+      return {
+        name: row.name,
+        price: Number(row.price) || 0,
+        originalPrice: row.originalPrice ? Number(row.originalPrice) : undefined,
+        costPrice: Number(row.costPrice) || 0,
+        stock: Number(row.stock) || 0,
+        category: row.category || 'casual',
+        description: row.description || '',
+        image: row.image || '',
+        images: row.image ? [row.image] : [],
+      };
+    });
+  }
+
+  const handleBulkUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setBulkUploading(true);
+    try {
+      const text = await file.text();
+      const parsedProducts = parseCSV(text);
+
+      const res = await fetch(`${API_BASE_URL}/api/admin/products/bulk`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ products: parsedProducts }),
+      });
+
+      if (!res.ok) throw new Error('Bulk upload fail ho gaya');
+
+      const data = await res.json();
+      alert(data.message);
+      loadProducts();
+    } catch (err) {
+      alert('CSV file parse/upload nahi ho saki. Format check karein.');
+    } finally {
+      setBulkUploading(false);
+      e.target.value = '';
+    }
+  };
+
   return (
     <div>
       <div className="admin-page-header">
         <h1 className="admin-page-title">Products</h1>
-        <button className="admin-primary-btn" onClick={openAddForm}>
-          + Add Product
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <label className="admin-secondary-btn" style={{ cursor: 'pointer', margin: 0 }}>
+            {bulkUploading ? 'Uploading...' : '📄 Bulk Upload CSV'}
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleBulkUpload}
+              style={{ display: 'none' }}
+              disabled={bulkUploading}
+            />
+          </label>
+          <button className="admin-primary-btn" onClick={openAddForm}>
+            + Add Product
+          </button>
+        </div>
+      </div>
+
+      <p className="admin-hint-text" style={{ marginBottom: '16px' }}>
+        CSV format: name,price,originalPrice,costPrice,stock,category,description,image
+      </p>
+
+      <div className="admin-filter-row">
+        <input
+          className="admin-search-input"
+          placeholder="Search products by name..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <select
+          className="admin-category-filter"
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value)}
+        >
+          <option value="all">All Categories</option>
+          <option value="casual">Casual</option>
+          <option value="formal">Formal</option>
+          <option value="party">Party</option>
+          <option value="gym">Gym</option>
+        </select>
       </div>
 
       {showForm && (
@@ -145,11 +252,25 @@ export default function AdminProducts() {
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
 
-            <label>Image</label>
-            <input type="file" accept="image/*" onChange={handleImageChange} />
+            <label>Images (ek se zyada select kar sakte hain)</label>
+            <input type="file" accept="image/*" multiple onChange={handleImageChange} />
             {uploading && <p className="admin-hint-text">Uploading...</p>}
-            {form.image && (
-              <img src={form.image} alt="preview" className="admin-image-preview" />
+            {form.images.length > 0 && (
+              <div className="admin-image-gallery">
+                {form.images.map((url, i) => (
+                  <div className="admin-image-thumb-wrapper" key={url + i}>
+                    <img src={url} alt={`preview ${i}`} className="admin-image-thumb" />
+                    <button
+                      type="button"
+                      className="admin-image-remove-btn"
+                      onClick={() => removeImage(i)}
+                    >
+                      ×
+                    </button>
+                    {i === 0 && <span className="admin-image-main-badge">Main</span>}
+                  </div>
+                ))}
+              </div>
             )}
 
             <div className="admin-form-row">
@@ -223,6 +344,8 @@ export default function AdminProducts() {
 
       {loading ? (
         <div className="admin-loading">Loading products...</div>
+      ) : filteredProducts.length === 0 ? (
+        <p className="admin-empty-text">Koi product nahi mila.</p>
       ) : (
         <table className="admin-table">
           <thead>
@@ -237,7 +360,7 @@ export default function AdminProducts() {
             </tr>
           </thead>
           <tbody>
-            {products.map((p) => (
+            {filteredProducts.map((p) => (
               <tr key={p.id}>
                 <td>
                   <img src={p.image} alt={p.name} className="admin-table-img" />

@@ -70,28 +70,57 @@ function SimpleBarChart({ data }) {
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
+  const [bestSellers, setBestSellers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [dateRange, setDateRange] = useState('all'); // 'all' | '7' | '30' | '90'
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/admin/stats`)
-      .then((res) => res.json())
-      .then((data) => {
-        setStats(data);
+    setLoading(true);
+    const statsUrl =
+      dateRange === 'all'
+        ? `${API_BASE_URL}/api/admin/stats`
+        : `${API_BASE_URL}/api/admin/stats?days=${dateRange}`;
+
+    Promise.all([
+      fetch(statsUrl).then((res) => res.json()),
+      fetch(`${API_BASE_URL}/api/admin/best-sellers`).then((res) => res.json()),
+    ])
+      .then(([statsData, bestSellersData]) => {
+        setStats(statsData);
+        setBestSellers(bestSellersData);
         setLoading(false);
       })
       .catch(() => {
         setError('Stats load nahi ho sake.');
         setLoading(false);
       });
-  }, []);
+  }, [dateRange]);
 
   if (loading) return <div className="admin-loading">Loading dashboard...</div>;
   if (error) return <div className="admin-error">{error}</div>;
 
   return (
     <div>
-      <h1 className="admin-page-title">Dashboard</h1>
+      <div className="admin-page-header">
+        <h1 className="admin-page-title">Dashboard</h1>
+        <div className="admin-date-range-selector">
+          {[
+            { label: 'Last 7 Days', value: '7' },
+            { label: 'Last 30 Days', value: '30' },
+            { label: 'Last 90 Days', value: '90' },
+            { label: 'All Time', value: 'all' },
+          ].map((opt) => (
+            <button
+              key={opt.value}
+              className={`admin-range-btn ${dateRange === opt.value ? 'active' : ''}`}
+              onClick={() => setDateRange(opt.value)}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <div className="admin-stat-cards">
         <div className="admin-stat-card admin-stat-purple">
@@ -115,6 +144,11 @@ export default function AdminDashboard() {
       {stats.outOfStockCount > 0 && (
         <div className="admin-alert-banner">
           ⚠️ {stats.outOfStockCount} product(s) Out of Stock hain — Products page par check karein.
+        </div>
+      )}
+      {stats.lowStockCount > 0 && (
+        <div className="admin-alert-banner admin-alert-warning">
+          🔶 {stats.lowStockCount} product(s) ka stock kam ho raha hai (5 ya usse kam) — jald restock karein.
         </div>
       )}
 
@@ -154,6 +188,56 @@ export default function AdminDashboard() {
               ))}
             </tbody>
           </table>
+        )}
+      </div>
+      <div className="admin-panel">
+        <h2>Best-Selling Products</h2>
+        {bestSellers.length === 0 ? (
+          <p className="admin-empty-text">Abhi tak koi sale nahi hui.</p>
+        ) : (
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Units Sold</th>
+                <th>Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bestSellers.map((p) => (
+                <tr key={p.name}>
+                  <td style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <img src={p.image} alt={p.name} className="admin-table-img" />
+                    {p.name}
+                  </td>
+                  <td>{p.quantitySold}</td>
+                  <td>${p.revenue.toFixed(0)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+      <div className="admin-panel">
+        <h2>Category-wise Sales</h2>
+        {stats.categoryBreakdown.length === 0 ? (
+          <p className="admin-empty-text">Is date range mein koi sale nahi hui.</p>
+        ) : (
+          <div className="admin-category-list">
+            {stats.categoryBreakdown.map((c) => {
+              const maxRevenue = Math.max(...stats.categoryBreakdown.map((x) => x.revenue));
+              const widthPercent = maxRevenue > 0 ? (c.revenue / maxRevenue) * 100 : 0;
+              return (
+                <div className="admin-category-row" key={c.category}>
+                  <span className="admin-category-name">{c.category}</span>
+                  <div className="admin-category-bar-track">
+                    <div className="admin-category-bar-fill" style={{ width: `${widthPercent}%` }}></div>
+                  </div>
+                  <span className="admin-category-value">${c.revenue.toFixed(0)} ({c.unitsSold} units)</span>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>
