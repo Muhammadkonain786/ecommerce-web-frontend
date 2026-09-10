@@ -51,6 +51,10 @@ export default function Navbar() {
 
         {/* Right Icons: Cart & Profile */}
         <div className="nav-icons">
+          <Link to="/admin/dashboard" className="admin-nav-btn">
+            Admin
+          </Link>
+
           <Link to="/cart" className="icon-btn cart-icon-btn" aria-label="Shopping Cart">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="9" cy="21" r="1" />

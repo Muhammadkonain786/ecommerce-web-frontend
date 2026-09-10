@@ -2790,3 +2790,27 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Admin button in navbar */
+.admin-nav-btn {
+  background: #000;
+  color: #fff;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+.admin-nav-btn:hover {
+  opacity: 0.75;
+}
+
+@media (max-width: 560px) {
+  .admin-nav-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
