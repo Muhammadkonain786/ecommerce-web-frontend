@@ -40,6 +40,17 @@ export default function AdminOrders() {
     }
   };
 
+  const handleDelete = async (orderId) => {
+    if (!confirm('Kya aap sach mein ye order delete karna chahte hain?')) return;
+
+    try {
+      await fetch(`${API_BASE_URL}/api/admin/orders/${orderId}`, { method: 'DELETE' });
+      setOrders((prev) => prev.filter((o) => o.id !== orderId));
+    } catch (err) {
+      alert('Order delete nahi ho saka');
+    }
+  };
+
   if (loading) return <div className="admin-loading">Loading orders...</div>;
 
   return (
@@ -61,6 +72,7 @@ export default function AdminOrders() {
                 <th>Profit</th>
                 <th>Status</th>
                 <th>Invoice</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -92,6 +104,11 @@ export default function AdminOrders() {
                   <td>
                     <button className="admin-link-btn" onClick={() => setInvoiceOrder(o)}>
                       View
+                    </button>
+                  </td>
+                  <td>
+                    <button className="admin-link-btn admin-link-danger" onClick={() => handleDelete(o.id)}>
+                      Delete
                     </button>
                   </td>
                 </tr>
